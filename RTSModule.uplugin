@@ -17,6 +17,11 @@
 	"Installed": false,
 	"Modules": [
 		{
+			"Name": "OpenRTSCamera",
+			"Type": "Runtime",
+			"LoadingPhase": "Default"
+		},
+		{
 			"Name": "RTSModuleRuntime",
 			"Type": "Runtime",
 			"LoadingPhase": "Default"
@@ -35,10 +40,10 @@
 			"Name": "Niagara",
 			"Enabled": true
 		},
-		{
-			"Name": "OpenRTSCamera",
-			"Enabled": true
-		}
+    {
+      "Enabled": true,
+      "Name": "EnhancedInput"
+    }
 	],
 	"ExplicitlyLoaded": true,
 	"BuiltInInitialFeatureState": "Registered"

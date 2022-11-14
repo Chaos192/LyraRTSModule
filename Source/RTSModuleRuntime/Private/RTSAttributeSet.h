@@ -23,6 +23,7 @@ public:
 
 
 	ATTRIBUTE_ACCESSORS(ThisClass, Population);
+	ATTRIBUTE_ACCESSORS(ThisClass, PopulationCap);
 	ATTRIBUTE_ACCESSORS(ThisClass, Mineral);
 	ATTRIBUTE_ACCESSORS(ThisClass, Gas);
 
@@ -36,6 +37,9 @@ protected:
 		void OnRep_Population(const FGameplayAttributeData& OldValue);
 
 	UFUNCTION()
+		void OnRep_PopulationCap(const FGameplayAttributeData& OldValue);
+
+	UFUNCTION()
 		void OnRep_Mineral(const FGameplayAttributeData& OldValue);
 
 	UFUNCTION()
@@ -43,15 +47,20 @@ protected:
 
 	void ClampAttribute(const FGameplayAttribute& Attribute, float& NewValue) const;
 private:
-	// The number of bombs remaining
+
+	// Unit population cap
+	UPROPERTY(BlueprintReadOnly, ReplicatedUsing = OnRep_PopulationCap, Category = "RTSGame", Meta = (AllowPrivateAccess = true))
+		FGameplayAttributeData PopulationCap;
+
+	// current unit population count
 	UPROPERTY(BlueprintReadOnly, ReplicatedUsing = OnRep_Population, Category = "RTSGame", Meta = (AllowPrivateAccess = true))
 		FGameplayAttributeData Population;
 
-	// The maximum number of bombs that can be placed at once
+	// Current Mineral Amount
 	UPROPERTY(BlueprintReadOnly, ReplicatedUsing = OnRep_Mineral, Category = "RTSGame", Meta = (AllowPrivateAccess = true))
 		FGameplayAttributeData Mineral;
 
-	// The range/radius of bomb blasts
+	// Current Gas Amount
 	UPROPERTY(BlueprintReadOnly, ReplicatedUsing = OnRep_Gas, Category = "RTSGame", Meta = (AllowPrivateAccess = true))
 		FGameplayAttributeData Gas;
 

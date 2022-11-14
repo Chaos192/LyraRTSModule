@@ -6,8 +6,9 @@
 
 URTSAttributeSet::URTSAttributeSet()
 	: Population(10.0f)
+	, PopulationCap(15.0f)
 	, Mineral(100.0f)
-	, Gas(100.0f)
+	, Gas(0.0f)
 {
 }
 
@@ -24,6 +25,13 @@ void URTSAttributeSet::OnRep_Population(const FGameplayAttributeData& OldValue)
 {
 	GAMEPLAYATTRIBUTE_REPNOTIFY(ThisClass, Population, OldValue);
 }
+
+
+void URTSAttributeSet::OnRep_PopulationCap(const FGameplayAttributeData& OldValue)
+{
+	GAMEPLAYATTRIBUTE_REPNOTIFY(ThisClass, Population, OldValue);
+}
+
 
 void URTSAttributeSet::OnRep_Mineral(const FGameplayAttributeData& OldValue)
 {
@@ -53,7 +61,11 @@ void URTSAttributeSet::ClampAttribute(const FGameplayAttribute& Attribute, float
 {
 	if (Attribute == GetPopulationAttribute())
 	{
-		NewValue = FMath::Clamp(NewValue, 0.0f, MAXPOPULATION);
+		NewValue = FMath::Clamp(NewValue, 0.0f, GetPopulationCap());
+	}
+	else if (Attribute == GetPopulationCapAttribute())
+	{
+		NewValue = FMath::Clamp(NewValue, GetPopulation(), MAXPOPULATION);
 	}
 	else if (Attribute == GetMineralAttribute())
 	{
