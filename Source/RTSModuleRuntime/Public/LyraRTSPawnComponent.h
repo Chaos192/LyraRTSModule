@@ -3,8 +3,20 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "ModularCharacter.h"
+#include "Teams/LyraTeamAgentInterface.h"
+#include "AbilitySystemInterface.h"
+#include "GameplayCueInterface.h"
 #include "Character/LyraPawnComponent.h"
 #include "LyraRTSPawnComponent.generated.h"
+
+
+class ALyraPlayerController;
+class ALyraPlayerState;
+class ULyraAbilitySystemComponent;
+class UAbilitySystemComponent;
+class ULyraPawnExtensionComponent;
+class ULyraCameraComponent;
 
 /**
  * Actor Component that handle RTS logic , handle selection and task queue
@@ -15,8 +27,10 @@ class RTSMODULERUNTIME_API ULyraRTSPawnComponent : public ULyraPawnComponent
 	GENERATED_BODY()
 
 public:
+
 	bool bIsSelected = false;
 
 	UFUNCTION(BlueprintPure, Category = "RTS|Unit")
 		bool GetIsSelected() const { return bIsSelected; }
+
 };

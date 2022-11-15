@@ -5,8 +5,8 @@
 #include "Net/UnrealNetwork.h"
 
 URTSAttributeSet::URTSAttributeSet()
-	: Population(10.0f)
-	, PopulationCap(15.0f)
+	: PopulationCap(15.0f)
+	, Population(10.0f)
 	, Mineral(100.0f)
 	, Gas(0.0f)
 {
