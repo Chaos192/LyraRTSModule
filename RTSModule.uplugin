@@ -17,11 +17,6 @@
 	"Installed": false,
 	"Modules": [
 		{
-			"Name": "OpenRTSCamera",
-			"Type": "Runtime",
-			"LoadingPhase": "Default"
-		},
-		{
 			"Name": "RTSModuleRuntime",
 			"Type": "Runtime",
 			"LoadingPhase": "Default"
@@ -37,13 +32,49 @@
 			"Enabled": true
 		},
 		{
+			"Name": "ModularGameplay",
+			"Enabled": true
+		},
+		{
+			"Name": "ModularGameplayActors",
+			"Enabled": true
+		},
+		{
+			"Name": "ReplicationGraph",
+			"Enabled": true
+		},
+		{
+			"Name": "CommonGame",
+			"Enabled": true
+		},
+		{
+			"Name": "CommonUser",
+			"Enabled": true
+		},
+		{
+			"Name": "GameplayMessageRouter",
+			"Enabled": true
+		},
+		{
+			"Name": "UIExtension",
+			"Enabled": true
+		},
+		{
+			"Name": "CommonUI",
+			"Enabled": true
+		},
+		{
+			"Name": "EnhancedInput",
+			"Enabled": true
+		},
+		{
 			"Name": "Niagara",
 			"Enabled": true
 		},
-    {
-      "Enabled": true,
-      "Name": "EnhancedInput"
-    }
+		{
+			"Enabled": true,
+			"Name": "EnhancedInput"
+		}
 	],
 	"ExplicitlyLoaded": true,
 	"BuiltInInitialFeatureState": "Registered"

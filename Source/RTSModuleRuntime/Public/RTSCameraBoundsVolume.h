@@ -7,7 +7,7 @@
 #include "RTSCameraBoundsVolume.generated.h"
 
 UCLASS()
-class OPENRTSCAMERA_API ARTSCameraBoundsVolume : public ACameraBlockingVolume
+class RTSMODULERUNTIME_API ARTSCameraBoundsVolume : public ACameraBlockingVolume
 {
 	GENERATED_BODY()
 

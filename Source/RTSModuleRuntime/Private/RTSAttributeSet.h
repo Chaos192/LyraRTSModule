@@ -3,9 +3,18 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "AttributeSet.h"
 #include "AbilitySystem/Attributes/LyraAttributeSet.h"
 #include "NativeGameplayTags.h"
 #include "RTSAttributeSet.generated.h"
+
+
+class AActor;
+class UAbilitySystemComponent;
+class ULyraAbilitySystemComponent;
+class UObject;
+class UWorld;
+struct FGameplayEffectSpec;
 
 /**
  * 

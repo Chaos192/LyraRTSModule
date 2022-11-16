@@ -8,6 +8,7 @@
 #include "Components/CapsuleComponent.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "Components/InputComponent.h"
+#include "Components/ActorComponent.h"
 #include "Camera/LyraCameraComponent.h"
 #include "AbilitySystem/LyraAbilitySystemComponent.h"
 #include "Character/LyraHealthComponent.h"
@@ -20,28 +21,30 @@
 ARTSBasePlayerPawn::ARTSBasePlayerPawn(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
 {
-	CapsuleComponent = CreateDefaultSubobject<UCapsuleComponent>(ACharacter::CapsuleComponentName);
-	CapsuleComponent->InitCapsuleSize(34.0f, 88.0f);
-	CapsuleComponent->SetCollisionProfileName(UCollisionProfile::Pawn_ProfileName);
+	//CapsuleComponent = CreateDefaultSubobject<UCapsuleComponent>(ACharacter::CapsuleComponentName);
+	//CapsuleComponent->InitCapsuleSize(34.0f, 88.0f);
+	//CapsuleComponent->SetCollisionProfileName(UCollisionProfile::Pawn_ProfileName);
 
-	CapsuleComponent->CanCharacterStepUpOn = ECB_No;
-	CapsuleComponent->SetShouldUpdatePhysicsVolume(true);
-	CapsuleComponent->SetCanEverAffectNavigation(false);
-	CapsuleComponent->bDynamicObstacle = true;
-	RootComponent = CapsuleComponent;
-
+	//CapsuleComponent->CanCharacterStepUpOn = ECB_No;
+	//CapsuleComponent->SetShouldUpdatePhysicsVolume(true);
+	//CapsuleComponent->SetCanEverAffectNavigation(false);
+	//CapsuleComponent->bDynamicObstacle = true;
+	SceneRootComponent = CreateDefaultSubobject<USceneComponent>(TEXT("Root"));
+	RootComponent = SceneRootComponent;
 
 	SpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArm"));
-	SpringArm->SetupAttachment(CapsuleComponent);
+	SpringArm->SetupAttachment(RootComponent);
 
-	PawnExtComponent = CreateDefaultSubobject<ULyraPawnExtensionComponent>(TEXT("PawnExtensionComponent"));
+	PawnExtComponent = CreateDefaultSubobject<ULyraPawnExtensionComponent>(TEXT("LyraPawnExtensionComponent"));
 	PawnExtComponent->OnAbilitySystemInitialized_RegisterAndCall(FSimpleMulticastDelegate::FDelegate::CreateUObject(this, &ThisClass::OnAbilitySystemInitialized));
 	PawnExtComponent->OnAbilitySystemUninitialized_Register(FSimpleMulticastDelegate::FDelegate::CreateUObject(this, &ThisClass::OnAbilitySystemUninitialized));
 
-	CameraComponent = CreateDefaultSubobject<ULyraCameraComponent>(TEXT("CameraComponent"));
+	LyraHeroComponent = CreateDefaultSubobject<ULyraHeroComponent>(TEXT("LyraHeroComponent"));
+
+	CameraComponent = CreateDefaultSubobject<ULyraCameraComponent>(TEXT("Camera"));
 	CameraComponent->SetupAttachment(SpringArm);
-	//CameraComponent->SetRelativeLocation(FVector(-300.0f, 0.0f, 75.0f));
-	RTSCamera = CreateDefaultSubobject<URTSCamera>(TEXT("RTSCamera"));
+	// CameraComponent->SetRelativeLocation(FVector(-300.0f, 0.0f, 75.0f));
+	RTSCamera = CreateDefaultSubobject<URTSCamera>(TEXT("RTSCameraComponent"));
 
 }
 

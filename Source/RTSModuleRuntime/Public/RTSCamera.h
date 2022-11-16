@@ -1,5 +1,5 @@
 // Copyright 2022 Jesus Bracho All Rights Reserved.
-
+// Modify by NguyenPhiHung for Lyra
 #pragma once
 
 #include "CoreMinimal.h"
@@ -26,7 +26,7 @@ struct FMoveCameraCommand
 };
 
 UCLASS(Blueprintable, ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
-class OPENRTSCAMERA_API URTSCamera : public UActorComponent
+class RTSMODULERUNTIME_API URTSCamera : public UActorComponent
 {
 	GENERATED_BODY()
 

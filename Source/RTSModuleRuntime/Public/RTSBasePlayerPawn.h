@@ -6,7 +6,9 @@
 #include "ModularCharacter.h"
 #include "ModularPawn.h"
 #include "RTSCamera.h"
+#include "Character/LyraHeroComponent.h"
 #include "Character/LyraPawnExtensionComponent.h"
+#include "Components/SceneComponent.h"
 #include "Camera/LyraCameraComponent.h"
 #include "Character/LyraPawn.h"
 #include "Teams/LyraTeamAgentInterface.h"
@@ -15,6 +17,7 @@
 #include "GameplayTagAssetInterface.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "RTSBasePlayerPawn.generated.h"
+
 
 /**
  * Lyra RTS Pawn
@@ -49,13 +52,15 @@ protected:
 private:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "RTS|Pawn", Meta = (AllowPrivateAccess = "true"))
-		ULyraPawnExtensionComponent* PawnExtComponent;
-
+		TObjectPtr<ULyraPawnExtensionComponent> PawnExtComponent;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "RTS|Pawn", Meta = (AllowPrivateAccess = "true"))
-		ULyraCameraComponent* CameraComponent;
+		TObjectPtr<ULyraHeroComponent> LyraHeroComponent;
+	
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "RTS|Pawn", Meta = (AllowPrivateAccess = "true"))
+		TObjectPtr<ULyraCameraComponent> CameraComponent;
 	/** The CapsuleComponent being used for movement collision (by CharacterMovement). Always treated as being vertically aligned in simple collision check functions. */
 	UPROPERTY(Category = "RTS|Pawn", VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
-		TObjectPtr<UCapsuleComponent> CapsuleComponent;
+		TObjectPtr<USceneComponent> SceneRootComponent;
 
 	UPROPERTY(Category = "RTS|Pawn", VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 		TObjectPtr<USpringArmComponent> SpringArm;

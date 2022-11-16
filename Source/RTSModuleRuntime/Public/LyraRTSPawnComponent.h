@@ -7,7 +7,7 @@
 #include "Teams/LyraTeamAgentInterface.h"
 #include "AbilitySystemInterface.h"
 #include "GameplayCueInterface.h"
-#include "Character/LyraPawnComponent.h"
+#include "Character/LyraPawnExtensionComponent.h"
 #include "LyraRTSPawnComponent.generated.h"
 
 
@@ -22,7 +22,7 @@ class ULyraCameraComponent;
  * Actor Component that handle RTS logic , handle selection and task queue
  */
 UCLASS(Blueprintable, Meta = (BlueprintSpawnableComponent))
-class RTSMODULERUNTIME_API ULyraRTSPawnComponent : public ULyraPawnComponent
+class RTSMODULERUNTIME_API ULyraRTSPawnComponent : public ULyraPawnExtensionComponent
 {
 	GENERATED_BODY()
 
