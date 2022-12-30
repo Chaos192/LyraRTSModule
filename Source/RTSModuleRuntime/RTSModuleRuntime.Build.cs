@@ -39,8 +39,7 @@ public class RTSModuleRuntime : ModuleRules
 				"ModularGameplay",
 				"ModularGameplayActors",
 				"DataRegistry",
-				"ReplicationGraph",
-				"OpenRTSCamera"
+				"ReplicationGraph"
 				// ... add other public dependencies that you statically link with here ...
 			}
 			);
