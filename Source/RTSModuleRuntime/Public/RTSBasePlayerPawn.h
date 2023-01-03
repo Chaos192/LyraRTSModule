@@ -5,19 +5,39 @@
 #include "CoreMinimal.h"
 #include "ModularCharacter.h"
 #include "ModularPawn.h"
-#include "RTSCamera.h"
+#include "RTSPlayerHeroComponent.h"
 #include "Character/LyraHeroComponent.h"
+#include "Character/LyraHealthComponent.h"
 #include "Character/LyraPawnExtensionComponent.h"
 #include "Components/SceneComponent.h"
 #include "Camera/LyraCameraComponent.h"
-#include "Character/LyraPawn.h"
+#include "Character/LyraCharacter.h"
 #include "Teams/LyraTeamAgentInterface.h"
 #include "AbilitySystemInterface.h"
 #include "GameplayCueInterface.h"
 #include "GameplayTagAssetInterface.h"
 #include "GameFramework/SpringArmComponent.h"
+#include "RTSSelectionHandlerComponent.h"
+#include "RTSPlayerMovementComponent.h"
 #include "RTSBasePlayerPawn.generated.h"
 
+class AActor;
+class AController;
+class ALyraPlayerController;
+class ALyraPlayerState;
+class FLifetimeProperty;
+class IRepChangedPropertyTracker;
+class UAbilitySystemComponent;
+class UInputComponent;
+class ULyraAbilitySystemComponent;
+class ULyraCameraComponent;
+class ULyraHealthComponent;
+class ULyraPawnExtensionComponent;
+class UObject;
+struct FFrame;
+struct FGameplayTag;
+struct FGameplayTagContainer;
+class URTSPlayerHeroComponent;
 
 /**
  * Lyra RTS Pawn
@@ -26,45 +46,12 @@
  * * require code change to LyraAbilitySystemComponent.h to expose ULyraAbilitySystemComponent class
  * TODO: lessen depedency on these class
  */
-UCLASS(Blueprintable, Meta = (BlueprintSpawnableComponent))
-class RTSMODULERUNTIME_API ARTSBasePlayerPawn : public ALyraPawn, public IAbilitySystemInterface, public IGameplayCueInterface, public IGameplayTagAssetInterface
+UCLASS(Config = Game, Meta = (ShortTooltip = "The base character pawn class used by this project."))
+class RTSMODULERUNTIME_API ARTSBasePlayerPawn : public ALyraCharacter
 {
 	GENERATED_BODY()
 	
-
 public:
-
 	ARTSBasePlayerPawn(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
 
-	UFUNCTION(BlueprintCallable, Category = "Lyra|Pawn")
-		ULyraAbilitySystemComponent* GetLyraAbilitySystemComponent() const;
-	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
-
-	virtual void GetOwnedGameplayTags(FGameplayTagContainer& TagContainer) const override;
-	virtual bool HasMatchingGameplayTag(FGameplayTag TagToCheck) const override;
-	virtual bool HasAllMatchingGameplayTags(const FGameplayTagContainer& TagContainer) const override;
-	virtual bool HasAnyMatchingGameplayTags(const FGameplayTagContainer& TagContainer) const override;
-protected:
-
-	virtual void OnAbilitySystemInitialized();
-	virtual void OnAbilitySystemUninitialized();
-	void InitializeGameplayTags();
-private:
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "RTS|Pawn", Meta = (AllowPrivateAccess = "true"))
-		TObjectPtr<ULyraPawnExtensionComponent> PawnExtComponent;
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "RTS|Pawn", Meta = (AllowPrivateAccess = "true"))
-		TObjectPtr<ULyraHeroComponent> LyraHeroComponent;
-	
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "RTS|Pawn", Meta = (AllowPrivateAccess = "true"))
-		TObjectPtr<ULyraCameraComponent> CameraComponent;
-	/** The CapsuleComponent being used for movement collision (by CharacterMovement). Always treated as being vertically aligned in simple collision check functions. */
-	UPROPERTY(Category = "RTS|Pawn", VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
-		TObjectPtr<USceneComponent> SceneRootComponent;
-
-	UPROPERTY(Category = "RTS|Pawn", VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
-		TObjectPtr<USpringArmComponent> SpringArm;
-
-	UPROPERTY(Category = "RTS|Pawn", VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
-		TObjectPtr<URTSCamera> RTSCamera;
 };

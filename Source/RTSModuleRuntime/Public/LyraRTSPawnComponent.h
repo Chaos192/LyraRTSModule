@@ -27,10 +27,11 @@ class RTSMODULERUNTIME_API ULyraRTSPawnComponent : public ULyraPawnExtensionComp
 	GENERATED_BODY()
 
 public:
-
-	bool bIsSelected = false;
+	ULyraRTSPawnComponent(const FObjectInitializer& ObjectInitializer);
+	
 
 	UFUNCTION(BlueprintPure, Category = "RTS|Unit")
 		bool GetIsSelected() const { return bIsSelected; }
-
+private:
+	bool bIsSelected = false;
 };

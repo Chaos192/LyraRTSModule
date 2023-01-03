@@ -26,20 +26,10 @@ public class RTSModuleRuntime : ModuleRules
 			new string[]
 			{
 				"Core",
-				"CoreOnline",
-				"CoreUObject",
 				"LyraGame",
-				"ApplicationCore",
-				"Engine",
-				"PhysicsCore",
-				"GameplayTags",
-				"GameplayTasks",
-				"GameplayAbilities",
-				"AIModule",
 				"ModularGameplay",
 				"ModularGameplayActors",
-				"DataRegistry",
-				"ReplicationGraph"
+				"CommonGame"
 				// ... add other public dependencies that you statically link with here ...
 			}
 			);
@@ -50,18 +40,20 @@ public class RTSModuleRuntime : ModuleRules
 			{
 
                 "CoreUObject",
-				"LyraGame",
 				"Engine",
                 "Slate",
                 "SlateCore",
-                "GameplayAbilities",
-                "GameplayTags",
+				"GameplayTags",
+				"GameplayTasks",
+				"GameplayAbilities",
+				"GameplayMessageRuntime",
 				"AIModule",
 				"Niagara",
-				"CommonGame",
 				"CommonUser",
-				"GameplayMessageRuntime",
+				"CommonUI",
+				"CommonInput",
 				"NetworkReplayStreaming",
+				"DataRegistry",
 				"UIExtension",
 				"ClientPilot",
 				"InputCore",
@@ -72,13 +64,11 @@ public class RTSModuleRuntime : ModuleRules
 				"RHI",
 				"Projects",
 				"UMG",
-				"CommonUI",
-				"CommonInput",
 				"GameplayMessageRuntime",
 				"AudioMixer",
 				"NetworkReplayStreaming",
 				"UIExtension",
-				"ClientPilot",
+				"ClientPilot"
 				// ... add private dependencies that you statically link with here ...	
 			}
 			);
