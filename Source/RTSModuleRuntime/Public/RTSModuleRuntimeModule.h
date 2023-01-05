@@ -4,6 +4,13 @@
 
 #include "CoreMinimal.h"
 #include "Modules/ModuleManager.h"
+#include "Containers/UnrealString.h"
+#include "Logging/LogMacros.h"
+
+class UObject;
+
+RTSMODULERUNTIME_API DECLARE_LOG_CATEGORY_EXTERN(LogRTS, Log, All);
+RTSMODULERUNTIME_API DECLARE_LOG_CATEGORY_EXTERN(LogRTSExperience, Log, All);
 
 class FRTSModuleRuntimeModule : public IModuleInterface
 {

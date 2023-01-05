@@ -34,6 +34,8 @@ URTSPlayerHeroComponent::URTSPlayerHeroComponent(const FObjectInitializer& Objec
 {
 	AbilityCameraMode = nullptr;
 	bReadyToBindInputs = false;
+	PrimaryComponentTick.bStartWithTickEnabled = false;
+	bAutoActivate = false;
 }
 
 void URTSPlayerHeroComponent::FollowTarget(AActor* Target)
@@ -42,6 +44,11 @@ void URTSPlayerHeroComponent::FollowTarget(AActor* Target)
 
 void URTSPlayerHeroComponent::UnFollowTarget()
 {
+}
+
+ALyraCharacter* URTSPlayerHeroComponent::GetLyraCharacter()
+{
+	return GetPawnChecked<ALyraCharacter>();
 }
 
 void URTSPlayerHeroComponent::OnRegister()
@@ -57,8 +64,10 @@ void URTSPlayerHeroComponent::BeginPlay()
 
 void URTSPlayerHeroComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
-	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+	DeltaSeconds = DeltaTime;
 	ConditionallyPerformEdgeScrolling();
+	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+
 }
 
 void URTSPlayerHeroComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
@@ -82,7 +91,7 @@ void URTSPlayerHeroComponent::InitializePlayerInput(UInputComponent* PlayerInput
 	const ULyraLocalPlayer* LP = Cast<ULyraLocalPlayer>(PC->GetLocalPlayer());
 	check(LP);
 
-	ConditionallyEnableEdgeScrolling();
+	//ConditionallyEnableEdgeScrolling();
 
 	UEnhancedInputLocalPlayerSubsystem* Subsystem = LP->GetSubsystem<UEnhancedInputLocalPlayerSubsystem>();
 	check(Subsystem);
@@ -144,7 +153,7 @@ void URTSPlayerHeroComponent::Input_MoveCamera(const FInputActionValue& InputAct
 	if (Controller)
 	{
 		const FVector2D Value = InputActionValue.Get<FVector2D>();
-		const FRotator MovementRotation(0.0f, Controller->GetControlRotation().Pitch, 0.0f);
+		const FRotator MovementRotation(0.0f, Controller->GetControlRotation().Yaw, 0.0f);
 
 		if (Value.X != 0.0f)
 		{
@@ -158,6 +167,46 @@ void URTSPlayerHeroComponent::Input_MoveCamera(const FInputActionValue& InputAct
 			Pawn->AddMovementInput(MovementDirection, Value.Y);
 		}
 	}
+}
+
+void URTSPlayerHeroComponent::Input_EdgeScrollCamera(const FInputActionValue& InputActionValue)
+{
+	UE_LOG(LogRTS, Display, TEXT("RTS EdgeScroll Camera. [%s]"), *InputActionValue.ToString());
+
+	ConditionallyPerformEdgeScrolling();
+}
+
+void URTSPlayerHeroComponent::Input_RotateCameraLeft(const FInputActionValue& InputActionValue)
+{
+	APawn* Pawn = GetPawn<APawn>();
+	Pawn->AddControllerYawInput(-90.0f);
+	Pawn->SetActorRelativeRotation(
+		FRotator::MakeFromEuler(
+			FVector(
+				0.0f,
+				0.0,
+				-90.0f
+			)
+		)
+	);
+	UE_LOG(LogRTS, Display, TEXT("RTS Rotate Camera Left."));
+}
+
+void URTSPlayerHeroComponent::Input_RotateCameraRight(const FInputActionValue& InputActionValue)
+{
+
+	APawn* Pawn = GetPawn<APawn>();
+	Pawn->AddControllerYawInput(90.0f);
+	Pawn->SetActorRelativeRotation(
+		FRotator::MakeFromEuler(
+			FVector(
+				0,
+				0,
+				90
+			)
+		)
+	);
+	UE_LOG(LogRTS, Display, TEXT("RTS Rotate Camera Right."));
 }
 
 void URTSPlayerHeroComponent::ConditionallyEnableEdgeScrolling() const
@@ -178,6 +227,7 @@ void URTSPlayerHeroComponent::ConditionallyPerformEdgeScrolling() const
 {
 	if (EnableEdgeScrolling && !IsDragging)
 	{
+		
 		EdgeScrollLeft();
 		EdgeScrollRight();
 		EdgeScrollUp();
@@ -187,6 +237,8 @@ void URTSPlayerHeroComponent::ConditionallyPerformEdgeScrolling() const
 
 void URTSPlayerHeroComponent::EdgeScrollLeft() const
 {
+	APawn* Pawn = GetPawn<APawn>();
+	//UE_LOG(LogRTS, Display, TEXT("RTS EdgeScroll Camera Left."));
 	const auto MousePosition = UWidgetLayoutLibrary::GetMousePositionOnViewport(GetWorld());
 	const auto ViewportSize = UWidgetLayoutLibrary::GetViewportWidgetGeometry(GetWorld()).GetLocalSize();
 	const auto NormalizedMousePosition = 1 - UKismetMathLibrary::NormalizeToRange(
@@ -196,14 +248,18 @@ void URTSPlayerHeroComponent::EdgeScrollLeft() const
 	);
 
 	const auto Movement = UKismetMathLibrary::FClamp(NormalizedMousePosition, 0.0, 1.0);
-
-	GetOwner()->GetRootComponent()->AddRelativeLocation(
-		-1 * GetOwner()->GetRootComponent()->GetRightVector() * Movement * EdgeScrollSpeed * DeltaSeconds
-	);
+	const auto Direction = GetOwner()->GetActorRightVector();
+	if (Movement > 0.0f) {
+		UE_LOG(LogRTS, Display, TEXT("RTS EdgeScroll Camera Left. [%d]"), Movement);
+		Pawn->AddMovementInput(
+			-1 * Direction, Movement * EdgeScrollSpeed
+		);
+	}
 }
 
 void URTSPlayerHeroComponent::EdgeScrollRight() const
 {
+	APawn* Pawn = GetPawn<APawn>();
 	const auto MousePosition = UWidgetLayoutLibrary::GetMousePositionOnViewport(GetWorld());
 	const auto ViewportSize = UWidgetLayoutLibrary::GetViewportWidgetGeometry(GetWorld()).GetLocalSize();
 	const auto NormalizedMousePosition = UKismetMathLibrary::NormalizeToRange(
@@ -213,13 +269,19 @@ void URTSPlayerHeroComponent::EdgeScrollRight() const
 	);
 
 	const auto Movement = UKismetMathLibrary::FClamp(NormalizedMousePosition, 0.0, 1.0);
-	GetOwner()->GetRootComponent()->AddRelativeLocation(
-		GetOwner()->GetRootComponent()->GetRightVector() * Movement * EdgeScrollSpeed * DeltaSeconds
-	);
+	const auto Direction = GetOwner()->GetActorRightVector();
+	
+	if (Movement > 0.0f) {
+		UE_LOG(LogRTS, Display, TEXT("RTS EdgeScroll Camera Right. [%d]"), Movement);
+		Pawn->AddMovementInput(
+			Direction, Movement * EdgeScrollSpeed
+		);
+	}
 }
 
 void URTSPlayerHeroComponent::EdgeScrollUp() const
 {
+	APawn* Pawn = GetPawn<APawn>();
 	const auto MousePosition = UWidgetLayoutLibrary::GetMousePositionOnViewport(GetWorld());
 	const auto ViewportSize = UWidgetLayoutLibrary::GetViewportWidgetGeometry(GetWorld()).GetLocalSize();
 	const auto NormalizedMousePosition = UKismetMathLibrary::NormalizeToRange(
@@ -229,13 +291,19 @@ void URTSPlayerHeroComponent::EdgeScrollUp() const
 	);
 
 	const auto Movement = 1 - UKismetMathLibrary::FClamp(NormalizedMousePosition, 0.0, 1.0);
-	GetOwner()->GetRootComponent()->AddRelativeLocation(
-		GetOwner()->GetRootComponent()->GetForwardVector() * Movement * EdgeScrollSpeed * DeltaSeconds
-	);
+	const auto Direction = GetOwner()->GetActorForwardVector();
+
+	if (Movement > 0.0f) {
+		UE_LOG(LogRTS, Display, TEXT("RTS EdgeScroll Camera Right. [%d]"), Movement);
+		Pawn->AddMovementInput(
+			Direction, Movement * EdgeScrollSpeed
+		);
+	}
 }
 
 void URTSPlayerHeroComponent::EdgeScrollDown() const
 {
+	APawn* Pawn = GetPawn<APawn>();
 	const auto MousePosition = UWidgetLayoutLibrary::GetMousePositionOnViewport(GetWorld());
 	const auto ViewportSize = UWidgetLayoutLibrary::GetViewportWidgetGeometry(GetWorld()).GetLocalSize();
 	const auto NormalizedMousePosition = UKismetMathLibrary::NormalizeToRange(
@@ -245,12 +313,20 @@ void URTSPlayerHeroComponent::EdgeScrollDown() const
 	);
 
 	const auto Movement = UKismetMathLibrary::FClamp(NormalizedMousePosition, 0.0, 1.0);
-	GetOwner()->GetRootComponent()->AddRelativeLocation(
-		-1 * GetOwner()->GetRootComponent()->GetForwardVector() * Movement * EdgeScrollSpeed * DeltaSeconds
-	);
+	const auto Direction = GetOwner()->GetActorForwardVector();
+
+	if (Movement > 0.0f) {
+		UE_LOG(LogRTS, Display, TEXT("RTS EdgeScroll Camera Right. [%d]"), Movement);
+		Pawn->AddMovementInput(
+			-1 * Direction, Movement * EdgeScrollSpeed
+		);
+	};
 }
 
 void URTSPlayerHeroComponent::BindInputTags(ULyraInputComponent* PlayerInputComponent, const ULyraInputConfig* InputConfig)
 {
 	PlayerInputComponent->BindNativeAction(InputConfig, InputTag_Camera_Move, ETriggerEvent::Triggered, this, &ThisClass::Input_MoveCamera, /*bLogIfNotFound=*/ false);
+	PlayerInputComponent->BindNativeAction(InputConfig, InputTag_Camera_TurnLeft, ETriggerEvent::Triggered, this, &ThisClass::Input_RotateCameraLeft, /*bLogIfNotFound=*/ false);
+	PlayerInputComponent->BindNativeAction(InputConfig, InputTag_Camera_TurnRight, ETriggerEvent::Triggered, this, &ThisClass::Input_RotateCameraRight, /*bLogIfNotFound=*/ false);
+	//PlayerInputComponent->BindNativeAction(InputConfig, InputTag_Camera_EdgeScroll, ETriggerEvent::Triggered, this, &ThisClass::Input_EdgeScrollCamera, /*bLogIfNotFound=*/ false);
 }

@@ -2,6 +2,8 @@
 
 #include "RTSModuleRuntimeModule.h"
 
+DEFINE_LOG_CATEGORY(LogRTS);
+DEFINE_LOG_CATEGORY(LogRTSExperience);
 #define LOCTEXT_NAMESPACE "FRTSModuleRuntimeModule"
 
 void FRTSModuleRuntimeModule::StartupModule()

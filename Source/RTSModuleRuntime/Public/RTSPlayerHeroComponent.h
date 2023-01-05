@@ -49,6 +49,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "RTSCamera")
 		void UnFollowTarget();
 
+	UFUNCTION(BlueprintCallable, Category = "Lyra")
+		ALyraCharacter* GetLyraCharacter();
+
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "RTSCamera - Edge Scroll Settings")
 		bool EnableEdgeScrolling=true;
 	UPROPERTY(
@@ -94,7 +97,9 @@ protected:
 	virtual void InitializePlayerInput(UInputComponent* PlayerInputComponent) override;
 
 	void Input_MoveCamera(const FInputActionValue& InputActionValue);
-
+	void Input_EdgeScrollCamera(const FInputActionValue& InputActionValue);
+	void Input_RotateCameraLeft(const FInputActionValue& InputActionValue);
+	void Input_RotateCameraRight(const FInputActionValue& InputActionValue);
 private:
 	void ConditionallyEnableEdgeScrolling() const;
 	void ConditionallyPerformEdgeScrolling() const;
@@ -108,5 +113,5 @@ private:
 	UPROPERTY()
 		float DeltaSeconds;
 	UPROPERTY()
-		bool IsDragging;
+		bool IsDragging=false;
 };

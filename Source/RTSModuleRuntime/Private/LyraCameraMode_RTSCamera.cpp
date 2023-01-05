@@ -15,8 +15,8 @@ ULyraCameraMode_RTSCamera::ULyraCameraMode_RTSCamera()
 void ULyraCameraMode_RTSCamera::UpdateView(float DeltaTime)
 {
 
-	FVector PivotLocation = GetPivotLocation() + DefaultPivotRotation.Vector() * StartingHeight;
-	FRotator PivotRotation = DefaultPivotRotation;
+	FRotator PivotRotation = GetPivotRotation() + DefaultPivotRotation;
+	FVector PivotLocation = GetPivotLocation() + PivotRotation.Vector() * StartingHeight;
 
 	PivotRotation.Pitch = FMath::ClampAngle(PivotRotation.Pitch, ViewPitchMin, ViewPitchMax);
 
