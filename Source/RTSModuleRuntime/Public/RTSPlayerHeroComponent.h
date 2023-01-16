@@ -27,6 +27,13 @@ struct FFrame;
 struct FGameplayTag;
 struct FInputActionValue;
 
+struct FCameraMovementCommand
+{
+    FVector Direction;
+	float Scale;
+	FGameplayTag CameraTag;
+};
+
 /**
  * 
  */
@@ -93,14 +100,17 @@ protected:
 		FActorComponentTickFunction* ThisTickFunction
 	) override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
-
+	
 	virtual void InitializePlayerInput(UInputComponent* PlayerInputComponent) override;
 
 	void Input_MoveCamera(const FInputActionValue& InputActionValue);
+	void Input_DragCamera(const FInputActionValue& InputActionValue);
 	void Input_EdgeScrollCamera(const FInputActionValue& InputActionValue);
 	void Input_RotateCameraLeft(const FInputActionValue& InputActionValue);
 	void Input_RotateCameraRight(const FInputActionValue& InputActionValue);
 private:
+	void QueueCameraMovementCommand(const FVector Direction, const float Scale, FGameplayTag CameraMovementTag);
+	void ApplyMoveCameraCommands();
 	void ConditionallyEnableEdgeScrolling() const;
 	void ConditionallyPerformEdgeScrolling() const;
 	void EdgeScrollLeft() const;
@@ -110,8 +120,15 @@ private:
 
 	void BindInputTags( ULyraInputComponent* PlayerInputComponent, const ULyraInputConfig* InputConfig);
 
+	TQueue<FCameraMovementCommand> CameraMovementCommandQueue;
+
 	UPROPERTY()
 		float DeltaSeconds;
 	UPROPERTY()
 		bool IsDragging=false;
+	UPROPERTY()
+		FVector2D DragStartLocation;
+	UPROPERTY()
+		float DragExtent=0.01f;
 };
+

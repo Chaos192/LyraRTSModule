@@ -2,52 +2,36 @@
 
 #pragma once
 
-#include "Containers/Map.h"
-#include "Containers/UnrealString.h"
+#include "CoreMinimal.h"
 #include "GameplayTagContainer.h"
-#include "HAL/Platform.h"
+#include "GameplayTagsManager.h"
+#include "NativeGameplayTags.h"
 
-class UGameplayTagsManager;
+UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Camera_Move);
+UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Camera_Drag);
+UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Camera_EdgeScroll);
+UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Camera_Turn);
 
-/**
- * FRTSGameplayTags
- *
- *	Singleton containing native gameplay tags.
- */
-struct FRTSGameplayTags
+struct FRTSGameplayTags : public FGameplayTagNativeAdder
 {
-public:
+//	//Tag used for Fire Damage
+//	FGameplayTag Damage_Fire;
+//
+	//Static accessor for accessing the tags. Access tags using:
+	//FRTSGameplayTags::Get().Damage_Fire for example.
+	FORCEINLINE static const FRTSGameplayTags& Get() { return RTSGameplayTags; }
 
-	static const FRTSGameplayTags& Get() { return GameplayTags; }
-
-	static void InitializeNativeTags();
-
-	static FGameplayTag FindTagByString(FString TagString, bool bMatchPartialString = false);
-
-public:
-
-	FGameplayTag InputTag_Camera_Move;
-	FGameplayTag InputTag_Camera_RotateAxis;
-	FGameplayTag InputTag_Camera_TurnLeft;
-	FGameplayTag InputTag_Camera_TurnRight;
-	FGameplayTag InputTag_Camera_EdgeScroll;
-	FGameplayTag InputTag_Camera_Drag;
-	FGameplayTag InputTag_Camera_Zoom;
-
-	FGameplayTag GameplayEvent_Resign;
-	FGameplayTag GameplayEvent_Lose;
-	FGameplayTag GameplayEvent_Win;
-	FGameplayTag GameplayEvent_RequestRematch;
-
-	FGameplayTag Cheat_UnitGodMode;
-	FGameplayTag Cheat_UnlimitedResources;
-
-protected:
-
-	void AddAllTags(UGameplayTagsManager& Manager);
-	void AddTag(FGameplayTag& OutTag, const ANSICHAR* TagName, const ANSICHAR* TagComment);
-
+//protected:
+//	//Called to register and assign the native tags
+//	virtual void AddTags() override
+//	{
+//		UGameplayTagsManager& Manager = UGameplayTagsManager::Get();
+//
+//		Damage_Fire = Manager.AddNativeGameplayTag(TEXT("Status.Damage.Fire"));
+//	}
+//
+//
 private:
-
-	static FRTSGameplayTags GameplayTags;
+	//Private static object for the global tags. Use the Get() function to access externally.
+	static FRTSGameplayTags RTSGameplayTags;
 };

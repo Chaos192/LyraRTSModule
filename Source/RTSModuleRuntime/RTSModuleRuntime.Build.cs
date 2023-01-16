@@ -29,7 +29,7 @@ public class RTSModuleRuntime : ModuleRules
 				"LyraGame",
 				"ModularGameplay",
 				"ModularGameplayActors",
-				"CommonGame"
+				"CommonGame",
 				// ... add other public dependencies that you statically link with here ...
 			}
 			);

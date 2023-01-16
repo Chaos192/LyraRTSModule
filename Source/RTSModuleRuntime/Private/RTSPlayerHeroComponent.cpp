@@ -29,6 +29,8 @@
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(RTSPlayerHeroComponent)
 
+
+
 URTSPlayerHeroComponent::URTSPlayerHeroComponent(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
 {
@@ -64,11 +66,13 @@ void URTSPlayerHeroComponent::BeginPlay()
 
 void URTSPlayerHeroComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
-	DeltaSeconds = DeltaTime;
-	ConditionallyPerformEdgeScrolling();
+	
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-
+	ConditionallyPerformEdgeScrolling();
+	ApplyMoveCameraCommands();
+	DeltaSeconds = DeltaTime;
 }
+
 
 void URTSPlayerHeroComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
@@ -104,12 +108,11 @@ void URTSPlayerHeroComponent::InitializePlayerInput(UInputComponent* PlayerInput
 		{
 			if (const ULyraInputConfig* InputConfig = PawnData->InputConfig)
 			{
-				const FRTSGameplayTags& GameplayTags = FRTSGameplayTags::Get();
+			/*	const FRTSGameplayTags& GameplayTags = FRTSGameplayTags::Get();*/
 
 				// Register any default input configs with the settings so that they will be applied to the player during AddInputMappings
 				for (const FMappableConfigPair& Pair : DefaultInputConfigs)
 				{
-					if (Pair.bShouldActivateAutomatically && Pair.CanBeActivated())
 					{
 						FModifyContextOptions Options = {};
 						Options.bIgnoreAllPressedKeysUntilRelease = false;
@@ -118,6 +121,7 @@ void URTSPlayerHeroComponent::InitializePlayerInput(UInputComponent* PlayerInput
 					}
 				}
 
+				// Need to change expose LyInputConfig and LyraInputComponent
 				ULyraInputComponent* LyraIC = CastChecked<ULyraInputComponent>(PlayerInputComponent);
 				LyraIC->AddInputMappings(InputConfig, Subsystem);
 
@@ -158,14 +162,61 @@ void URTSPlayerHeroComponent::Input_MoveCamera(const FInputActionValue& InputAct
 		if (Value.X != 0.0f)
 		{
 			const FVector MovementDirection = MovementRotation.RotateVector(FVector::RightVector);
-			Pawn->AddMovementInput(MovementDirection, Value.X);
+			//Pawn->AddMovementInput(MovementDirection, Value.X);
+			QueueCameraMovementCommand(MovementDirection, Value.X, TAG_Camera_Move);
 		}
 
 		if (Value.Y != 0.0f)
 		{
 			const FVector MovementDirection = MovementRotation.RotateVector(FVector::ForwardVector);
-			Pawn->AddMovementInput(MovementDirection, Value.Y);
+			//Pawn->AddMovementInput(MovementDirection, Value.Y);
+			QueueCameraMovementCommand(MovementDirection, Value.Y, TAG_Camera_Move);
 		}
+	}
+}
+
+void URTSPlayerHeroComponent::Input_DragCamera(const FInputActionValue& InputActionValue)
+{
+	if (!IsDragging && InputActionValue.Get<bool>())
+	{
+		IsDragging = true;
+		DragStartLocation = UWidgetLayoutLibrary::GetMousePositionOnViewport(GetWorld());
+	}
+
+	else if (IsDragging && InputActionValue.Get<bool>())
+	{
+		APawn* Pawn = GetPawn<APawn>();
+		AController* Controller = Pawn ? Pawn->GetController() : nullptr;
+
+		// If the player has attempted to move again then cancel auto running
+		if (ALyraPlayerController* LyraController = Cast<ALyraPlayerController>(Controller))
+		{
+			LyraController->SetIsAutoRunning(false);
+		}
+
+		const auto MousePosition = UWidgetLayoutLibrary::GetMousePositionOnViewport(GetWorld());
+		auto DragExtents = UWidgetLayoutLibrary::GetViewportWidgetGeometry(GetWorld()).GetLocalSize();
+		DragExtents *= DragExtent;
+
+		auto Delta = MousePosition - DragStartLocation;
+		Delta.X = FMath::Clamp(Delta.X, -DragExtents.X, DragExtents.X) / DragExtents.X;
+		Delta.Y = FMath::Clamp(Delta.Y, -DragExtents.Y, DragExtents.Y) / DragExtents.Y;
+
+		const FRotator MovementRotation(0.0f, Controller->GetControlRotation().Yaw, 0.0f);
+
+		QueueCameraMovementCommand(
+			MovementRotation.RotateVector(FVector::RightVector),
+			Delta.X, TAG_Camera_Drag);
+
+		QueueCameraMovementCommand(
+			MovementRotation.RotateVector(FVector::ForwardVector),
+			Delta.Y * -1, TAG_Camera_Drag);
+
+	}
+
+	else if (IsDragging && !InputActionValue.Get<bool>())
+	{
+		IsDragging = false;
 	}
 }
 
@@ -207,6 +258,29 @@ void URTSPlayerHeroComponent::Input_RotateCameraRight(const FInputActionValue& I
 		)
 	);
 	UE_LOG(LogRTS, Display, TEXT("RTS Rotate Camera Right."));
+}
+
+void URTSPlayerHeroComponent::QueueCameraMovementCommand(const FVector Direction, const float Scale, FGameplayTag CameraMovementTag)
+{
+	FCameraMovementCommand MovementCommand;
+	MovementCommand.Direction = Direction;
+	MovementCommand.Scale = Scale;
+	MovementCommand.CameraTag = CameraMovementTag;
+	CameraMovementCommandQueue.Enqueue(MovementCommand);
+}
+
+void URTSPlayerHeroComponent::ApplyMoveCameraCommands()
+{
+	APawn* Pawn = GetPawn<APawn>();
+	while(!CameraMovementCommandQueue.IsEmpty())
+	{
+		FCameraMovementCommand MovementCommand;
+		CameraMovementCommandQueue.Dequeue(MovementCommand);
+		Pawn->AddMovementInput(
+			MovementCommand.Direction, MovementCommand.Scale
+		);
+		UE_LOG(LogRTS, Display, TEXT("RTS Camera Movement. [%s]"), *MovementCommand.CameraTag.ToString());
+	}
 }
 
 void URTSPlayerHeroComponent::ConditionallyEnableEdgeScrolling() const
@@ -329,4 +403,5 @@ void URTSPlayerHeroComponent::BindInputTags(ULyraInputComponent* PlayerInputComp
 	PlayerInputComponent->BindNativeAction(InputConfig, InputTag_Camera_TurnLeft, ETriggerEvent::Triggered, this, &ThisClass::Input_RotateCameraLeft, /*bLogIfNotFound=*/ false);
 	PlayerInputComponent->BindNativeAction(InputConfig, InputTag_Camera_TurnRight, ETriggerEvent::Triggered, this, &ThisClass::Input_RotateCameraRight, /*bLogIfNotFound=*/ false);
 	//PlayerInputComponent->BindNativeAction(InputConfig, InputTag_Camera_EdgeScroll, ETriggerEvent::Triggered, this, &ThisClass::Input_EdgeScrollCamera, /*bLogIfNotFound=*/ false);
+	PlayerInputComponent->BindNativeAction(InputConfig, InputTag_Camera_Drag, ETriggerEvent::Triggered, this, &ThisClass::Input_DragCamera, /*bLogIfNotFound=*/ false);
 }
