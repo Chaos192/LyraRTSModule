@@ -399,9 +399,10 @@ void URTSPlayerHeroComponent::EdgeScrollDown() const
 
 void URTSPlayerHeroComponent::BindInputTags(ULyraInputComponent* PlayerInputComponent, const ULyraInputConfig* InputConfig)
 {
-	PlayerInputComponent->BindNativeAction(InputConfig, InputTag_Camera_Move, ETriggerEvent::Triggered, this, &ThisClass::Input_MoveCamera, /*bLogIfNotFound=*/ false);
-	PlayerInputComponent->BindNativeAction(InputConfig, InputTag_Camera_TurnLeft, ETriggerEvent::Triggered, this, &ThisClass::Input_RotateCameraLeft, /*bLogIfNotFound=*/ false);
-	PlayerInputComponent->BindNativeAction(InputConfig, InputTag_Camera_TurnRight, ETriggerEvent::Triggered, this, &ThisClass::Input_RotateCameraRight, /*bLogIfNotFound=*/ false);
+	const FRTSGameplayTags& GameplayTags = FRTSGameplayTags::Get();
+	PlayerInputComponent->BindNativeAction(InputConfig, GameplayTags.Input_CameraMove, ETriggerEvent::Triggered, this, &ThisClass::Input_MoveCamera, /*bLogIfNotFound=*/ false);
+	PlayerInputComponent->BindNativeAction(InputConfig, GameplayTags.Input_CameraTurnLeft, ETriggerEvent::Triggered, this, &ThisClass::Input_RotateCameraLeft, /*bLogIfNotFound=*/ false);
+	PlayerInputComponent->BindNativeAction(InputConfig, GameplayTags.Input_CameraTurnRight, ETriggerEvent::Triggered, this, &ThisClass::Input_RotateCameraRight, /*bLogIfNotFound=*/ false);
 	//PlayerInputComponent->BindNativeAction(InputConfig, InputTag_Camera_EdgeScroll, ETriggerEvent::Triggered, this, &ThisClass::Input_EdgeScrollCamera, /*bLogIfNotFound=*/ false);
-	PlayerInputComponent->BindNativeAction(InputConfig, InputTag_Camera_Drag, ETriggerEvent::Triggered, this, &ThisClass::Input_DragCamera, /*bLogIfNotFound=*/ false);
+	PlayerInputComponent->BindNativeAction(InputConfig, GameplayTags.Input_CameraDrag, ETriggerEvent::Triggered, this, &ThisClass::Input_DragCamera, /*bLogIfNotFound=*/ false);
 }

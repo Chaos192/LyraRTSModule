@@ -76,20 +76,6 @@ public:
 	)
 		float DistanceFromEdgeThreshold = 0.1f;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Meta = (Categories = "InputTag"))
-		FGameplayTag InputTag_Camera_Move;
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Meta = (Categories = "InputTag"))
-	FGameplayTag InputTag_Camera_RotateAxis;
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Meta = (Categories = "InputTag"))
-	FGameplayTag InputTag_Camera_TurnLeft;
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Meta = (Categories = "InputTag"))
-	FGameplayTag InputTag_Camera_TurnRight;
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Meta = (Categories = "InputTag"))
-	FGameplayTag InputTag_Camera_EdgeScroll;
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Meta = (Categories = "InputTag"))
-	FGameplayTag InputTag_Camera_Drag;
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Meta = (Categories = "InputTag"))
-	FGameplayTag InputTag_Camera_Zoom;
 protected:
 
 	virtual void OnRegister() override;
