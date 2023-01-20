@@ -6,11 +6,6 @@
 #include "GameplayTagContainer.h"
 #include "GameplayTagsManager.h"
 
-UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Camera_Move);
-UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Camera_Drag);
-UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Camera_EdgeScroll);
-UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Camera_Turn);
-
 struct RTSMODULERUNTIME_API FRTSGameplayTags : public FGameplayTagNativeAdder
 {
 public:

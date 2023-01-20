@@ -30,6 +30,17 @@
 #include UE_INLINE_GENERATED_CPP_BY_NAME(RTSPlayerHeroComponent)
 
 
+UE_DEFINE_GAMEPLAY_TAG_STATIC(TAG_Direction_Left, "Direction.Left")
+UE_DEFINE_GAMEPLAY_TAG_STATIC(TAG_Direction_Right, "Direction.Right")
+UE_DEFINE_GAMEPLAY_TAG_STATIC(TAG_Direction_Up, "Direction.Up")
+UE_DEFINE_GAMEPLAY_TAG_STATIC(TAG_Direction_Down, "Direction.Down")
+UE_DEFINE_GAMEPLAY_TAG_STATIC(TAG_Direction_In, "Direction.In")
+UE_DEFINE_GAMEPLAY_TAG_STATIC(TAG_Direction_Out, "Direction.Out")
+UE_DEFINE_GAMEPLAY_TAG_STATIC(TAG_Camera_Move, "RTSGame.Camera.State.Moving")
+UE_DEFINE_GAMEPLAY_TAG_STATIC(TAG_Camera_Drag, "RTSGame.Camera.State.Dragging")
+UE_DEFINE_GAMEPLAY_TAG_STATIC(TAG_Camera_EdgeScroll, "RTSGame.Camera.State.EdgeScrolling")
+UE_DEFINE_GAMEPLAY_TAG_STATIC(TAG_Camera_Rotate, "RTSGame.Camera.State.Rotating")
+UE_DEFINE_GAMEPLAY_TAG_STATIC(TAG_Camera_Zoom, "RTSGame.Camera.State.Zooming")
 
 URTSPlayerHeroComponent::URTSPlayerHeroComponent(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
@@ -159,18 +170,32 @@ void URTSPlayerHeroComponent::Input_MoveCamera(const FInputActionValue& InputAct
 		const FVector2D Value = InputActionValue.Get<FVector2D>();
 		const FRotator MovementRotation(0.0f, Controller->GetControlRotation().Yaw, 0.0f);
 
+		FGameplayTagContainer CameraTags;
+
 		if (Value.X != 0.0f)
 		{
+			if (Value.X > 0.0f) {
+				CameraTags.AddTag(TAG_Direction_Right);
+			}
+			else {
+				CameraTags.AddTag(TAG_Direction_Left);
+			}
 			const FVector MovementDirection = MovementRotation.RotateVector(FVector::RightVector);
 			//Pawn->AddMovementInput(MovementDirection, Value.X);
-			QueueCameraMovementCommand(MovementDirection, Value.X, TAG_Camera_Move);
+			QueueCameraMovementCommand(MovementDirection, Value.X, CameraTags);
 		}
 
 		if (Value.Y != 0.0f)
 		{
+			if (Value.Y > 0.0f) {
+				CameraTags.AddTag(TAG_Direction_Up);
+			}
+			else {
+				CameraTags.AddTag(TAG_Direction_Down);
+			}
 			const FVector MovementDirection = MovementRotation.RotateVector(FVector::ForwardVector);
 			//Pawn->AddMovementInput(MovementDirection, Value.Y);
-			QueueCameraMovementCommand(MovementDirection, Value.Y, TAG_Camera_Move);
+			QueueCameraMovementCommand(MovementDirection, Value.Y, CameraTags);
 		}
 	}
 }
@@ -204,13 +229,27 @@ void URTSPlayerHeroComponent::Input_DragCamera(const FInputActionValue& InputAct
 
 		const FRotator MovementRotation(0.0f, Controller->GetControlRotation().Yaw, 0.0f);
 
+		FGameplayTagContainer CameraTags;
+		CameraTags.AddTagFast(TAG_Camera_Drag);
+		if (Delta.X > 0.0f) {
+			CameraTags.AddTag(TAG_Direction_Right);
+		}
+		else {
+			CameraTags.AddTag(TAG_Direction_Left);
+		}
+		if (Delta.Y > 0.0f) {
+			CameraTags.AddTag(TAG_Direction_Up);
+		}
+		else {
+			CameraTags.AddTag(TAG_Direction_Down);
+		}
 		QueueCameraMovementCommand(
 			MovementRotation.RotateVector(FVector::RightVector),
-			Delta.X, TAG_Camera_Drag);
+			Delta.X, CameraTags);
 
 		QueueCameraMovementCommand(
 			MovementRotation.RotateVector(FVector::ForwardVector),
-			Delta.Y * -1, TAG_Camera_Drag);
+			Delta.Y * -1, CameraTags);
 
 	}
 
@@ -220,16 +259,19 @@ void URTSPlayerHeroComponent::Input_DragCamera(const FInputActionValue& InputAct
 	}
 }
 
+void URTSPlayerHeroComponent::Input_ZoomCamera(const FInputActionValue& InputActionValue)
+{
+}
+
 void URTSPlayerHeroComponent::Input_EdgeScrollCamera(const FInputActionValue& InputActionValue)
 {
-	UE_LOG(LogRTS, Display, TEXT("RTS EdgeScroll Camera. [%s]"), *InputActionValue.ToString());
 
 	ConditionallyPerformEdgeScrolling();
 }
 
 void URTSPlayerHeroComponent::Input_RotateCameraLeft(const FInputActionValue& InputActionValue)
 {
-	APawn* Pawn = GetPawn<APawn>();
+	/*APawn* Pawn = GetPawn<APawn>();
 	Pawn->AddControllerYawInput(-90.0f);
 	Pawn->SetActorRelativeRotation(
 		FRotator::MakeFromEuler(
@@ -239,32 +281,47 @@ void URTSPlayerHeroComponent::Input_RotateCameraLeft(const FInputActionValue& In
 				-90.0f
 			)
 		)
-	);
-	UE_LOG(LogRTS, Display, TEXT("RTS Rotate Camera Left."));
+	);*/
+	FGameplayTagContainer CameraTag;
+	CameraTag.AddTag(TAG_Direction_Left);
+	QueueCameraRotationCommand(-90.0f, CameraTag);
 }
 
 void URTSPlayerHeroComponent::Input_RotateCameraRight(const FInputActionValue& InputActionValue)
 {
 
-	APawn* Pawn = GetPawn<APawn>();
-	Pawn->AddControllerYawInput(90.0f);
-	Pawn->SetActorRelativeRotation(
-		FRotator::MakeFromEuler(
-			FVector(
-				0,
-				0,
-				90
-			)
-		)
-	);
-	UE_LOG(LogRTS, Display, TEXT("RTS Rotate Camera Right."));
+	//APawn* Pawn = GetPawn<APawn>();
+	//Pawn->AddControllerYawInput(90.0f);
+	//Pawn->SetActorRelativeRotation(
+	//	FRotator::MakeFromEuler(
+	//		FVector(
+	//			0,
+	//			0,
+	//			90
+	//		)
+	//	)
+	//);
+
+	FGameplayTagContainer CameraTag;
+	CameraTag.AddTag(TAG_Direction_Right);
+	QueueCameraRotationCommand(90.0f, CameraTag);
 }
 
-void URTSPlayerHeroComponent::QueueCameraMovementCommand(const FVector Direction, const float Scale, FGameplayTag CameraMovementTag)
+void URTSPlayerHeroComponent::QueueCameraMovementCommand(const FVector Direction, const double Scale, FGameplayTagContainer CameraMovementTag)
 {
+	CameraMovementTag.AddTagFast(TAG_Camera_Move);
 	FCameraMovementCommand MovementCommand;
 	MovementCommand.Direction = Direction;
 	MovementCommand.Scale = Scale;
+	MovementCommand.CameraTag = CameraMovementTag;
+	CameraMovementCommandQueue.Enqueue(MovementCommand);
+}
+
+void URTSPlayerHeroComponent::QueueCameraRotationCommand(const float Rotation, FGameplayTagContainer CameraMovementTag)
+{
+	CameraMovementTag.AddTagFast(TAG_Camera_Rotate);
+	FCameraMovementCommand MovementCommand;
+	MovementCommand.Rotation = Rotation;
 	MovementCommand.CameraTag = CameraMovementTag;
 	CameraMovementCommandQueue.Enqueue(MovementCommand);
 }
@@ -279,7 +336,10 @@ void URTSPlayerHeroComponent::ApplyMoveCameraCommands()
 		Pawn->AddMovementInput(
 			MovementCommand.Direction, MovementCommand.Scale
 		);
-		UE_LOG(LogRTS, Display, TEXT("RTS Camera Movement. [%s]"), *MovementCommand.CameraTag.ToString());
+		if (MovementCommand.Rotation != 0.0) {
+			Pawn->AddControllerYawInput(MovementCommand.Rotation);
+		}
+		UE_LOG(LogRTS, Display, TEXT("RTS Camera Movement. [%s]"), *MovementCommand.CameraTag.ToStringSimple());
 	}
 }
 
@@ -289,15 +349,19 @@ void URTSPlayerHeroComponent::ConditionallyEnableEdgeScrolling() const
 	{
 		FInputModeGameAndUI InputMode;
 		InputMode.SetLockMouseToViewportBehavior(EMouseLockMode::LockAlways);
-		InputMode.SetHideCursorDuringCapture(false);
+		// InputMode.SetHideCursorDuringCapture(false);
 		APlayerController* PC = GetController<APlayerController>();
 		check(PC);
 		PC->SetInputMode(InputMode);
-		PC->bShowMouseCursor = true;
+		//PC->bShowMouseCursor = true;
 	}
 }
 
-void URTSPlayerHeroComponent::ConditionallyPerformEdgeScrolling() const
+/// <summary>
+/// TODO:
+/// Find way to better implement edgescrolling
+/// </summary>
+void URTSPlayerHeroComponent::ConditionallyPerformEdgeScrolling()
 {
 	if (EnableEdgeScrolling && !IsDragging)
 	{
@@ -309,7 +373,7 @@ void URTSPlayerHeroComponent::ConditionallyPerformEdgeScrolling() const
 	}
 }
 
-void URTSPlayerHeroComponent::EdgeScrollLeft() const
+void URTSPlayerHeroComponent::EdgeScrollLeft()
 {
 	APawn* Pawn = GetPawn<APawn>();
 	//UE_LOG(LogRTS, Display, TEXT("RTS EdgeScroll Camera Left."));
@@ -324,14 +388,18 @@ void URTSPlayerHeroComponent::EdgeScrollLeft() const
 	const auto Movement = UKismetMathLibrary::FClamp(NormalizedMousePosition, 0.0, 1.0);
 	const auto Direction = GetOwner()->GetActorRightVector();
 	if (Movement > 0.0f) {
-		UE_LOG(LogRTS, Display, TEXT("RTS EdgeScroll Camera Left. [%d]"), Movement);
-		Pawn->AddMovementInput(
-			-1 * Direction, Movement * EdgeScrollSpeed
-		);
+		// UE_LOG(LogRTS, Display, TEXT("RTS EdgeScroll Camera Left. [%d]"), Movement);
+		// Pawn->AddMovementInput(
+		// 	-1 * Direction, Movement * EdgeScrollSpeed
+		// );
+		FGameplayTagContainer CameraTags;
+		CameraTags.AddTag(TAG_Camera_EdgeScroll);
+		CameraTags.AddTag(TAG_Direction_Left);
+		QueueCameraMovementCommand(-1 * Direction, Movement * EdgeScrollSpeed, CameraTags);
 	}
 }
 
-void URTSPlayerHeroComponent::EdgeScrollRight() const
+void URTSPlayerHeroComponent::EdgeScrollRight()
 {
 	APawn* Pawn = GetPawn<APawn>();
 	const auto MousePosition = UWidgetLayoutLibrary::GetMousePositionOnViewport(GetWorld());
@@ -346,14 +414,18 @@ void URTSPlayerHeroComponent::EdgeScrollRight() const
 	const auto Direction = GetOwner()->GetActorRightVector();
 	
 	if (Movement > 0.0f) {
-		UE_LOG(LogRTS, Display, TEXT("RTS EdgeScroll Camera Right. [%d]"), Movement);
-		Pawn->AddMovementInput(
-			Direction, Movement * EdgeScrollSpeed
-		);
+		// UE_LOG(LogRTS, Display, TEXT("RTS EdgeScroll Camera Right. [%d]"), Movement);
+		// Pawn->AddMovementInput(
+		// 	Direction, Movement * EdgeScrollSpeed
+		// );
+		FGameplayTagContainer CameraTags;
+		CameraTags.AddTag(TAG_Camera_EdgeScroll);
+		CameraTags.AddTag(TAG_Direction_Right);
+		QueueCameraMovementCommand(Direction, Movement * EdgeScrollSpeed, CameraTags);
 	}
 }
 
-void URTSPlayerHeroComponent::EdgeScrollUp() const
+void URTSPlayerHeroComponent::EdgeScrollUp()
 {
 	APawn* Pawn = GetPawn<APawn>();
 	const auto MousePosition = UWidgetLayoutLibrary::GetMousePositionOnViewport(GetWorld());
@@ -368,14 +440,18 @@ void URTSPlayerHeroComponent::EdgeScrollUp() const
 	const auto Direction = GetOwner()->GetActorForwardVector();
 
 	if (Movement > 0.0f) {
-		UE_LOG(LogRTS, Display, TEXT("RTS EdgeScroll Camera Right. [%d]"), Movement);
-		Pawn->AddMovementInput(
-			Direction, Movement * EdgeScrollSpeed
-		);
+		// UE_LOG(LogRTS, Display, TEXT("RTS EdgeScroll Camera Right. [%d]"), Movement);
+		// Pawn->AddMovementInput(
+		// 	Direction, Movement * EdgeScrollSpeed
+		// );
+		FGameplayTagContainer CameraTags;
+		CameraTags.AddTag(TAG_Camera_EdgeScroll);
+		CameraTags.AddTag(TAG_Direction_Up);
+		QueueCameraMovementCommand(Direction, Movement * EdgeScrollSpeed, CameraTags);
 	}
 }
 
-void URTSPlayerHeroComponent::EdgeScrollDown() const
+void URTSPlayerHeroComponent::EdgeScrollDown()
 {
 	APawn* Pawn = GetPawn<APawn>();
 	const auto MousePosition = UWidgetLayoutLibrary::GetMousePositionOnViewport(GetWorld());
@@ -390,10 +466,14 @@ void URTSPlayerHeroComponent::EdgeScrollDown() const
 	const auto Direction = GetOwner()->GetActorForwardVector();
 
 	if (Movement > 0.0f) {
-		UE_LOG(LogRTS, Display, TEXT("RTS EdgeScroll Camera Right. [%d]"), Movement);
-		Pawn->AddMovementInput(
-			-1 * Direction, Movement * EdgeScrollSpeed
-		);
+		// UE_LOG(LogRTS, Display, TEXT("RTS EdgeScroll Camera Right. [%d]"), Movement);
+		// Pawn->AddMovementInput(
+		// 	-1 * Direction, Movement * EdgeScrollSpeed
+		// );
+		FGameplayTagContainer CameraTags;
+		CameraTags.AddTag(TAG_Camera_EdgeScroll);
+		CameraTags.AddTag(TAG_Direction_Down);
+		QueueCameraMovementCommand(-1*Direction, Movement * EdgeScrollSpeed, CameraTags);
 	};
 }
 
@@ -405,4 +485,5 @@ void URTSPlayerHeroComponent::BindInputTags(ULyraInputComponent* PlayerInputComp
 	PlayerInputComponent->BindNativeAction(InputConfig, GameplayTags.Input_CameraTurnRight, ETriggerEvent::Triggered, this, &ThisClass::Input_RotateCameraRight, /*bLogIfNotFound=*/ false);
 	//PlayerInputComponent->BindNativeAction(InputConfig, InputTag_Camera_EdgeScroll, ETriggerEvent::Triggered, this, &ThisClass::Input_EdgeScrollCamera, /*bLogIfNotFound=*/ false);
 	PlayerInputComponent->BindNativeAction(InputConfig, GameplayTags.Input_CameraDrag, ETriggerEvent::Triggered, this, &ThisClass::Input_DragCamera, /*bLogIfNotFound=*/ false);
+
 }

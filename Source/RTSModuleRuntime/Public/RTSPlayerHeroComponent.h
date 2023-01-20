@@ -15,6 +15,8 @@
 #include "UObject/NameTypes.h"
 #include "UObject/UObjectGlobals.h"
 #include "Input/LyraInputComponent.h"
+#include "GameplayTagContainer.h"
+#include "GameplayTagsManager.h"
 #include "RTSPlayerHeroComponent.generated.h"
 
 class UGameFrameworkComponentManager;
@@ -30,8 +32,9 @@ struct FInputActionValue;
 struct FCameraMovementCommand
 {
     FVector Direction;
+	float Rotation;
 	float Scale;
-	FGameplayTag CameraTag;
+	FGameplayTagContainer CameraTag;
 };
 
 /**
@@ -74,7 +77,7 @@ public:
 		Category = "RTSCamera - Edge Scroll Settings",
 		meta = (EditCondition = "EnableEdgeScrolling")
 	)
-		float DistanceFromEdgeThreshold = 0.1f;
+		float DistanceFromEdgeThreshold = 0.05f;
 
 protected:
 
@@ -91,18 +94,20 @@ protected:
 
 	void Input_MoveCamera(const FInputActionValue& InputActionValue);
 	void Input_DragCamera(const FInputActionValue& InputActionValue);
+	void Input_ZoomCamera(const FInputActionValue& InputActionValue);
 	void Input_EdgeScrollCamera(const FInputActionValue& InputActionValue);
 	void Input_RotateCameraLeft(const FInputActionValue& InputActionValue);
 	void Input_RotateCameraRight(const FInputActionValue& InputActionValue);
 private:
-	void QueueCameraMovementCommand(const FVector Direction, const float Scale, FGameplayTag CameraMovementTag);
+	void QueueCameraMovementCommand(const FVector Direction, const double Scale, FGameplayTagContainer CameraMovementTags);
+	void QueueCameraRotationCommand(const float Rotation, FGameplayTagContainer CameraMovementTags);
 	void ApplyMoveCameraCommands();
 	void ConditionallyEnableEdgeScrolling() const;
-	void ConditionallyPerformEdgeScrolling() const;
-	void EdgeScrollLeft() const;
-	void EdgeScrollRight() const;
-	void EdgeScrollUp() const;
-	void EdgeScrollDown() const;
+	void ConditionallyPerformEdgeScrolling();
+	void EdgeScrollLeft();
+	void EdgeScrollRight();
+	void EdgeScrollUp();
+	void EdgeScrollDown();
 
 	void BindInputTags( ULyraInputComponent* PlayerInputComponent, const ULyraInputConfig* InputConfig);
 
